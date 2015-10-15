@@ -1,9 +1,5 @@
 package siena.core;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import siena.BaseQueryData;
 import siena.ClassInfo;
 import siena.PersistenceManager;
@@ -13,6 +9,10 @@ import siena.core.batch.Batch;
 import siena.core.lifecycle.LifeCyclePhase;
 import siena.core.lifecycle.LifeCycleUtils;
 import siena.core.options.PmOption;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 public class PersistenceManagerLifeCycleWrapper implements PersistenceManager{
 	PersistenceManager pm;
@@ -136,17 +136,26 @@ public class PersistenceManagerLifeCycleWrapper implements PersistenceManager{
 
 	@Override
 	public <T> List<T> fetch(Query<T> query) {
-		return pm.fetch(query);
+		ClassInfo ci = ClassInfo.getClassInfo(query.getQueriedClass());
+		List<T> objs = pm.fetch(query);
+		for (T obj : objs) LifeCycleUtils.executeMethods(LifeCyclePhase.POST_FETCH, ci, obj);
+		return objs;
 	}
 
 	@Override
 	public <T> List<T> fetch(Query<T> query, int limit) {
-		return pm.fetch(query, limit);
+		ClassInfo ci = ClassInfo.getClassInfo(query.getQueriedClass());
+		List<T> objs = pm.fetch(query, limit);
+		for (T obj : objs) LifeCycleUtils.executeMethods(LifeCyclePhase.POST_FETCH, ci, obj);
+		return objs;
 	}
 
 	@Override
 	public <T> List<T> fetch(Query<T> query, int limit, Object offset) {
-		return pm.fetch(query, limit, offset);
+		ClassInfo ci = ClassInfo.getClassInfo(query.getQueriedClass());
+		List<T> objs = pm.fetch(query, limit, offset);
+		for (T obj : objs) LifeCycleUtils.executeMethods(LifeCyclePhase.POST_FETCH, ci, obj);
+		return objs;
 	}
 
 	@Override
@@ -236,17 +245,26 @@ public class PersistenceManagerLifeCycleWrapper implements PersistenceManager{
 
 	@Override
 	public <T> T getByKey(Class<T> clazz, Object key) {
-		return pm.getByKey(clazz, key);
+		ClassInfo ci = ClassInfo.getClassInfo(clazz);
+		T obj = pm.getByKey(clazz, key);
+		LifeCycleUtils.executeMethods(LifeCyclePhase.POST_FETCH, ci, obj);
+		return obj;
 	}
 
 	@Override
 	public <T> List<T> getByKeys(Class<T> clazz, Object... keys) {
-		return pm.getByKeys(clazz, keys);
+		ClassInfo ci = ClassInfo.getClassInfo(clazz);
+		List<T> objs = pm.getByKeys(clazz, keys);
+		for (T obj : objs) LifeCycleUtils.executeMethods(LifeCyclePhase.POST_FETCH, ci, obj);
+		return objs;
 	}
 
 	@Override
 	public <T> List<T> getByKeys(Class<T> clazz, Iterable<?> keys) {
-		return pm.getByKeys(clazz, keys);
+		ClassInfo ci = ClassInfo.getClassInfo(clazz);
+		List<T> objs = pm.getByKeys(clazz, keys);
+		for (T obj : objs) LifeCycleUtils.executeMethods(LifeCyclePhase.POST_FETCH, ci, obj);
+		return objs;
 	}
 
 	@Override
